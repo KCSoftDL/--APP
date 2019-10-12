@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="ic_menu" />
+    <drawable name="nav_call" />
+    <drawable name="nav_friends" />
+    <drawable name="nav_location" />
+    <drawable name="nav_mail" />
+    <drawable name="nav_task" />
+    <drawable name="nav_icon" />
+    <drawable name="nav_header" />
+    <drawable name="buguan" />
+</resources>

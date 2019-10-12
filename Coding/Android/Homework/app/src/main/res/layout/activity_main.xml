@@ -1,0 +1,89 @@
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:id="@+id/drawer_layout"
+    android:layout_height="match_parent">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/tabs_rg"
+            android:layout_marginBottom="-119dp" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_setting"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:layout_scrollFlags="scroll|enterAlways|snap"/>
+
+        <Button
+            android:id="@+id/test"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="测试" />
+        <RadioGroup
+            android:id="@+id/tabs_rg"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_alignParentBottom="true"
+            android:background="#dcdcdc"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/today_tab"
+                style="@style/Custom.TabRadioButton"
+                android:checked="true"
+                android:drawableTop="@drawable/tab_sign_selector"
+                android:text="今日" />
+
+            <RadioButton
+                android:id="@+id/record_tab"
+                style="@style/Custom.TabRadioButton"
+                android:drawableTop="@drawable/tab_record_selector"
+                android:text="记录" />
+
+            <View style="@style/Custom.TabRadioButton" />
+
+            <RadioButton
+                android:id="@+id/contact_tab"
+                style="@style/Custom.TabRadioButton"
+                android:drawableTop="@drawable/tab_contact_selector"
+                android:text="通讯录" />
+
+            <RadioButton
+                android:id="@+id/settings_tab"
+                style="@style/Custom.TabRadioButton"
+                android:drawableTop="@drawable/tab_setting_selector"
+                android:text="设置" />
+        </RadioGroup>
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/sign_iv"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:src="@drawable/press_to_take_photo" />
+    </RelativeLayout>
+    /*以下是左滑动菜单*/
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/nav_menu"
+        app:headerLayout="@layout/nav_header"
+        />
+
+</android.support.v4.widget.DrawerLayout>

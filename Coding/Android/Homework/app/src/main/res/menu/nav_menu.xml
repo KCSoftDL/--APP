@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+<group android:checkableBehavior="single">
+    <item
+        android:id="@+id/nav_take_photo"
+        android:icon="@drawable/nav_take_photo"
+        tools:ignore="AppCompatResource"
+        android:title="拍照识别"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/nav_share"
+        android:icon="@drawable/nav_friends"
+        android:title="朋友圈"
+        tools:ignore="AppCompatResource"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/nav_health_condition"
+        android:icon="@drawable/nav_location"
+        tools:ignore="AppCompatResource"
+        android:title="健康情况"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/nav_nutrition_information"
+        android:icon="@drawable/nav_mail"
+        tools:ignore="AppCompatResource"
+        android:title="营养信息"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/nav_recomment_recipe"
+        android:icon="@drawable/nav_task"
+        android:title="推荐食谱"
+        tools:ignore="AppCompatResource"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/nav_contact_us"
+        android:icon="@drawable/nav_contack"
+        android:title="联系我们"
+        tools:ignore="AppCompatResource"
+        app:showAsAction="always" />
+</group>
+</menu>

@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="180dp"
+    android:padding="10dp"
+    android:background="?attr/colorPrimary" >
+        <Button
+        android:id="@+id/portrait"
+        android:layout_height="80dp"
+        android:layout_width="80dp"
+        android:background="@drawable/nav_icon"
+        android:showAsAction="always"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+
+        android:showAsAction="always"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="邮箱或者其他信息"
+        android:textColor="#FFF"
+        android:textSize="14sp"/>
+    <TextView
+        android:id="@+id/mail"
+        android:showAsAction="ifRoom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/username"
+        android:text="用户名"
+        android:textColor="#FFF"
+        android:textSize="14sp"/>
+</RelativeLayout>

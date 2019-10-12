@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+   >
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_register"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:layout_scrollFlags="scroll|enterAlways|snap"/>
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:gravity="center">
+
+
+        <EditText
+            android:id="@+id/user_name"
+            android:layout_width="308dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/register_information_box"
+            android:hint="昵称" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:gravity="center"
+        android:hint="性别">
+
+        <TableRow
+            android:layout_width="308dp"
+            android:layout_height="45dp"
+            android:background="@drawable/register_information_box"
+            android:gravity="center"
+            >
+
+            <RadioGroup
+                android:id="@+id/user_sex"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/user_sexMale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:checked="true"
+                    android:text="男" />
+
+                <RadioButton
+                    android:id="@+id/user_sexFemale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:checked="false"
+                    android:text="女" />
+            </RadioGroup>
+        </TableRow>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/user_age"
+            android:layout_width="308dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/register_information_box"
+            android:hint="年龄"
+            android:maxLength="3" />
+    </LinearLayout>
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="65dp"
+       android:gravity="center">
+
+       <TableRow
+           android:layout_width="wrap_content"
+           android:layout_height="43dp"
+           android:background="@drawable/register_information_box"
+           android:gravity="center">
+
+
+           <RadioGroup
+               android:id="@+id/user_occupation"
+               android:layout_gravity="center_vertical"
+               android:orientation="horizontal">
+
+               <RadioButton
+                   android:id="@+id/user_normalUser"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_vertical"
+                   android:layout_weight="0.25"
+                   android:checked="true"
+                   android:text="普通用户" />
+
+               <RadioButton
+                   android:id="@+id/user_student"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_vertical"
+                   android:layout_weight="0.25"
+                   android:checked="false"
+                   android:text="学生" />
+
+               <RadioButton
+                   android:id="@+id/user_patriarch"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_vertical"
+                   android:layout_weight="0.25"
+                   android:checked="false"
+                   android:text="家长" />
+
+               <RadioButton
+                   android:id="@+id/user_school"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_vertical"
+                   android:layout_weight="0.25"
+                   android:checked="false"
+                   android:text="学校" />
+           </RadioGroup>
+       </TableRow>
+   </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+
+        <EditText
+            android:id="@+id/user_password"
+            android:layout_width="308dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/register_information_box"
+            android:inputType="number"
+            android:hint="密码(最少六位)"
+            android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/user_phoneNumber"
+            android:layout_width="308dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center_vertical"
+            android:inputType="number"
+            android:background="@drawable/register_information_box"
+            android:maxLength="11"
+            android:hint="手机号"/>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+
+        <EditText
+            android:layout_width="214dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="填写验证码"
+            android:background="@drawable/register_information_box"
+            android:inputType="number"
+            android:maxLength="6">
+        </EditText>
+        <Button
+            android:id="@+id/get_verification_code"
+            android:layout_width="95dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="获取验证码"
+            android:textColor="#E78888" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/press_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/login_button_shape"
+            android:gravity="center"
+            android:text="注册"
+            android:textColor="#fff" />
+    </LinearLayout>
+</LinearLayout>
