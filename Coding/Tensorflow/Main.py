@@ -1,15 +1,22 @@
-#import keras_applications.densenet as DenseNet
 import os
 import tensorflow as tf
 import numpy as np
-from tensorflow_core.python.keras import applications
-from tensorflow_core.python import keras
-from tensorflow_core.python.platform import tf_logging as logging
-import IPython.display as display
+from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras import applications
+# from tensorflow_core.python import keras
+from tensorflow import keras
+from tensorflow import data
 from data_loader import *
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+# from Dense_model import DenseNet
+from tensorflow.keras.callbacks import ReduceLROnPlateau
+from keras_applications.densenet import DenseNet
 
-logging.set_verbosity(logging.DEBUG)
 
+
+# logging.set_verbosity(logging.DEBUG)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # def read_tfRecord(file_tfRecord):
 #     queue = tf.train.string_input_producer([file_tfRecord])
@@ -42,77 +49,268 @@ logging.set_verbosity(logging.DEBUG)
 #     print(image,label)
 #     return image,label
 
+def add_new_last_layer(base_model, nb_classes):
+  """
+  添加最后的层
+  输入
+  base_model和分类数量
+  输出
+  新的keras的model
+  """
+  # x = base_model.output
+  x = base_model.get_layer(index=-1).output
+  x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
+  predictions = keras.layers.Dense(nb_classes, activation='softmax')(x) #new softmax layer
+  model = tf.keras.Model(base_model.inputs, predictions)
+  return model
 
-filepath = 'D:/Programming/tensorflow/data/train/chicken'
 
-model =  applications.DenseNet121(weights=None,
-                                   input_tensor=keras.layers.Input(shape=(224,224,3),dtype =tf.float32),
-                                   pooling=None,
-                                   input_shape=(224, 224, 3),
-                                   classes=5)
-X_train,y_train=data_loadder(filepath)
-#model = DenseNet.DenseNet(blocks=[6, 12, 24, 16],weights='imagenet',input_tensor=X_train,pooling='avg',input_shape=(224, 224, 3),classes=2)
-model.compile(loss=keras.losses.CategoricalCrossentropy(),
-               optimizer=keras.optimizers.Adam(lr=0.01),
-               metrics=['sparse_categorical_accuracy'])
-model.summary()
-model.fit(X_train,y_train,
-           batch_size = 32,
-           epochs =100 ,
+def train_model(train_filepath, test_filepath,savepath):
+
+    import json
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    # model = applications.densenet.DenseNet121(
+    #                  weights=None,
+    #                  input_tensor=keras.layers.Input(shape=config["input"]["size"], dtype=tf.float32),
+    #                  pooling=None,
+    #                  input_shape=config["input"]["size"],
+    #                  classes=config["input"]["num_classes"])
+
+    model = applications.densenet.DenseNet121(
+                                            weights='./DenseNet-BC-121-32-no-top.h5',
+                                            include_top=False,
+                                            # input_tensor=keras.layers.Input(shape=config["input"]["size"],dtype =tf.float32),
+                                            input_tensor=None,
+                                            # pooling='avg',
+                                            pooling=None,
+                                            input_shape=config["input"]["size"])
+    # x = model.output
+    # predictions = keras.layers.Dense(config["input"]["num_classes"], activation='softmax', name='outputs')(x)
+    # model = tf.keras.Model(input=model.input, output=predictions)
+    model = add_new_last_layer(model, config["input"]["num_classes"])
+
+    # model = DenseNet(config)
+    model.build((config["trainer"]["batch_size"], 224, 224, 3))
+
+    optimizer = tf.keras.optimizers.Adam(lr=0.002)
+    loss_object = tf.keras.losses.CategoricalCrossentropy()
+    train_loss = tf.keras.metrics.Mean(name="loss", dtype=tf.float32)
+    train_accuracy = tf.keras.metrics.CategoricalAccuracy(name='train_accuracy')
+
+
+    #设定格式化模型名称，以时间戳作为标记
+    #model_name = "LeiShenNiuPi!"
+    #设定存储位置，每个模型不一样的路径
+    #tensorboard = TensorBoard(log_dir='logs/{}'.format(model_name))
+
+    # model.load_weights('path_to_saved_model')
+
+
+    X_train = data_loadder(train_filepath)
+    X_test = data_loadder(test_filepath)
+
+    # (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+
+    # 数据预处理
+    def progress(x, y):
+        x = 2 * tf.cast(x, dtype=tf.float32) / 255. - 1.
+        x = tf.reshape(x, [ 224 , 224 , 3])
+        y = tf.one_hot(y, depth=10, dtype=tf.int32)
+        return x, y
+
+    # 构建dataset对象 方便对数据的管理
+    # x_train = tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(1000)
+    # x_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+    #
+    # train_db = x_train.map(progress).batch(32)
+    # test_db = x_test.map(progress).batch(32)
+    # x_train = x_train.reshape( 224 , 224 , 3 ).astype('float32') / 255
+    # x_test = x_test.reshape( 224 , 224 , 3 ).astype('float32') / 255
+    #model = DenseNet.DenseNet(blocks=[6, 12, 24, 16],weights='imagenet',input_tensor=X_train,pooling='avg',input_shape=(224, 224, 3),classes=2)
+
+    model.compile(loss=loss_object,
+               optimizer=optimizer,
+               metrics=['accuracy'])
+    model.summary()
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2,
+                              patience=5, min_lr=0.001)
+    history = model.fit( X_train,
+           # batch_size = BATCH_SIZE,
+           epochs =config["trainer"]["epochs"] ,
            verbose = 2,
-           steps_per_epoch =None)
+           steps_per_epoch = 256,
+           # validation_data = test_db,
+           # validation_freq = 2
+           callbacks=[TensorBoard(),reduce_lr]
+    )
 
-model.save('path_to_saved_model',save_format ='tf')
+    """
+    手动定义的fit方法
+    def train_step(images, labels):
+        with tf.GradientTape() as tape:
+            predictions = model(images)
+            loss = loss_object(labels, predictions)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
+        train_loss(loss)
+
+        train_accuracy(labels, predictions)
+
+    for epoch in range(config["trainer"]["epochs"]):
+        for step, (images, labels) in tqdm(enumerate(train_loader),
+                                           total=int(len(data) / config["trainer"]["batch_size"])):
+            # for step, (images, labels) in tqdm(data.read_tfRecord('D:/Programming/tensorflow/data/train224.tfrecords'), total=int(len(data) / config["trainer"]["batch_size"])):
+            train_step(images, labels)
+        template = 'Epoch {}, Loss: {:.4f}, Accuracy: {:.4f}'
+        print(template.format(epoch + 1,
+                              train_loss.result(),
+                              train_accuracy.result() * 100
+                              )
+              )
+        # train_accuracy.reset_states()
+    """
+    print('history dict:', history.history)
+
+    # test_scores = model.evaluate(X_test, verbose=2, steps= 32)
+    # print('Test loss:', test_scores[0])
+    # print('Test accuracy:', test_scores[1])
+
+    # savepath = "./models/DenseNet/1/"
+    # tf.saved_model.save(model, savepath)
+    model.save(savepath)
+
+    print("Success Save Model!")
+
+    # model = model.load_weights('model.h5')
+    #
+    # model.save('saved_model',save_format ='tf')
+    new_model = tf.keras.models.load_model(savepath,compile=True)
+
+    new_predictions = new_model.predict(X_test,verbose=1,steps=32)
+    print(new_predictions)
+    print(new_predictions)
+
+    test_scores =new_model.evaluate(X_test , verbose=1, steps= 32)
+    print('Test loss:', test_scores[0])
+    print('Test accuracy:', test_scores[1])
+
+    # new_model.predict(X_test)
+    # imported = tf.saved_model.load(savepath)
+
+    return model
 #
 # file_tfname = os.path.join(os.getcwd(), '/data/train224.tfrecords')
 #
-# def read_tfRecord(file_tfRecord):
-#     reader = tf.data.TFRecordDataset(file_tfname)  # 打开一个TFrecord
-#
-#     features = {
-#         'image_raw': tf.io.FixedLenFeature([], tf.string),
-#         'height': tf.io.FixedLenFeature([], tf.int64),
-#         'width': tf.io.FixedLenFeature([], tf.int64),
-#         'depth': tf.io.FixedLenFeature([], tf.int64,default_value=3),
-#         'label': tf.io.FixedLenFeature([], tf.int64)
-#     }
-#
-#
-#     def _parse_function(exam_proto):  # 映射函数，用于解析一条example
-#         return tf.io.parse_single_example(exam_proto, features)
-#
-#     # reader = reader.repeat (1) # 读取数据的重复次数为：1次，这个相当于epoch
-#     reader = reader.shuffle (buffer_size = 2000) # 在缓冲区中随机打乱数据
-#
-#     reader = reader.map (_parse_function) # 解析数据
-#     # image = tf.io.decode_raw(features['image_raw'],tf.float64)
-#     # tf_height = features['height']
-#     # tf_width = features['width']
-#     # tf_depth = features['depth']
-#     #
-#     # image = tf.reshape(image,[tf_height,tf_width,tf_depth])
-#     # label = tf.cast(features['label'], tf.int32)
-#     for image_feature in reader.take(10):
-#         image_raw = np.frombuffer(image_feature['image_raw'].numpy(), dtype=np.uint8)
-#         display.display(display.Image(data= image_raw))
-#     # batch  = reader.batch (batch_size = 32) # 每10条数据为一个batch，生成一个新的Dataset
-#
-#     # shape = []
-#     # batch_data_x, batch_data_y = np.array([]), np.array([])
-#     # for item in batch.take(1): # 测试，只取1个batch
-#     #     shape = item['shape'][0].numpy()
-#     #     for data in item['data']: # 一个item就是一个batch
-#     #         img_data = np.frombuffer(data.numpy(), dtype=np.uint8)
-#     #         batch_data_x = np.append (batch_data_x, img_data)
-#     #     for label in item ['label']:
-#     #         batch_data_y = np.append (batch_data_y, label.numpy())
-#     #
-#     # batch_data_x = batch_data_x.reshape ([-1, shape[0], shape[1], shape[2]])
-#     #print (image._shape,label) # = (10, 480, 640, 3) (10,)
-#     # return image,label
-#     return reader
+def read_tfRecord(file_tfRecord):
+    '''
+    该函数暂未测试
+    :param file_tfRecord:  文件路径
+    :return:
+    '''
+    reader = tf.data.TFRecordDataset(file_tfRecord)  # 打开一个TFrecord
+
+    features = {
+        'image_raw': tf.io.FixedLenFeature([], tf.string),
+        'height': tf.io.FixedLenFeature([], tf.int64),
+        'width': tf.io.FixedLenFeature([], tf.int64),
+        'depth': tf.io.FixedLenFeature([], tf.int64,default_value=3),
+        'label': tf.io.FixedLenFeature([], tf.int64)
+    }
 
 
+    def _parse_function(exam_proto):  # 映射函数，用于解析一条example
+        return tf.io.parse_single_example(exam_proto, features)
+
+    # reader = reader.repeat (1) # 读取数据的重复次数为：1次，这个相当于epoch
+    reader = reader.shuffle (buffer_size = 2000) # 在缓冲区中随机打乱数据
+
+    reader = reader.map (_parse_function) # 解析数据
+    # image = tf.io.decode_raw(features['image_raw'],tf.float64)
+    # tf_height = features['height']
+    # tf_width = features['width']
+    # tf_depth = features['depth']
+    #
+    # image = tf.reshape(image,[tf_height,tf_width,tf_depth])
+    # label = tf.cast(features['label'], tf.int32)
+    for image_feature in reader.take(10):
+        image_raw = np.frombuffer(image_feature['image_raw'].numpy(), dtype=np.uint8)
+        display.display(display.Image(data= image_raw))
+    # batch  = reader.batch (batch_size = 32) # 每10条数据为一个batch，生成一个新的Dataset
+
+    # shape = []
+    # batch_data_x, batch_data_y = np.array([]), np.array([])
+    # for item in batch.take(1): # 测试，只取1个batch
+    #     shape = item['shape'][0].numpy()
+    #     for data in item['data']: # 一个item就是一个batch
+    #         img_data = np.frombuffer(data.numpy(), dtype=np.uint8)
+    #         batch_data_x = np.append (batch_data_x, img_data)
+    #     for label in item ['label']:
+    #         batch_data_y = np.append (batch_data_y, label.numpy())
+    #
+    # batch_data_x = batch_data_x.reshape ([-1, shape[0], shape[1], shape[2]])
+    #print (image._shape,label) # = (10, 480, 640, 3) (10,)
+    # return image,label
+    return reader
+
+if __name__ == "__main__":
+    # logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s: %(message)s')
+
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0,1" # 选择哪一块gpu, 如果是 - 1，就是调用cpu
+    config = ConfigProto()
+    config.gpu_options.allow_growth = True
+    config.gpu_options.per_process_gpu_memory_fraction = 0.7 # 分配百分之七十的显存给程序使用，避免内存溢出，可以自己调整
+    session = InteractiveSession(config=config)
+
+    savepath = "./models/DenseNet/1/"
+    train_filepath = 'D:/Model/data/train'
+    test_filepath = 'D:/Model/data/test'
+    # gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+    # for gpu in gpus:
+    #     tf.config.experimental.set_memory_growth(gpu, True)
+
+    # model=train_model(train_filepath=test_filepath,test_filepath=test_filepath)
 
 
+    # model = applications.DenseNet121(weights=None,
+    #                                input_tensor=keras.layers.Input(shape=(224,224,3),dtype =tf.float32),
+    #                                pooling=None,
+    #                                input_shape=(224, 224, 3),
+    #                                classes=2)
+    # model.compile(loss=keras.losses.CategoricalCrossentropy(),
+    #            optimizer=keras.optimizers.Adam(lr=0.01),
+    #            metrics=['accuracy'])
+    # x_test = data_loadder(test_filepath)
+
+    model = train_model(train_filepath=train_filepath,test_filepath=test_filepath,savepath=savepath)
+
+    # predict = model.predict(x_test,verbose=1)
+    # print(model.predict(x_test))
+
+    # new_model=keras.models.load_model('saved_model')
+
+    # new_predictions = new_model.predict(x_test)
+    # print(new_predictions)
+    #
+    # test_filepath = 'E:/DL/data/test'
+    # x_test = data_loadder(test_filepath)
+    # new_predictions = model.predict(x_test)
+
+    # (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+    # x_train= x_train[0]
+    # plt.imshow(x_train)
+    # plt.grid(False)
+    # plt.xlabel(y_train)
+    # plt.show()
+
+    #将Keras模型转换为TF-Lite格式
+    out_path = "./models/output.tflite"
+
+    converter = tf.lite.TFLiteConverter.from_saved_model(savepath)
+    tflite_model = converter.convert()
+
+    with open(out_path, "wb") as f:
+        f.write(tflite_model)
